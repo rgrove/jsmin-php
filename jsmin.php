@@ -12,7 +12,7 @@
  * Permission is hereby granted to use this version of the library under the
  * same terms as jsmin.c, which has the following license:
  *
- * -- 
+ * --
  * Copyright (c) 2002 Douglas Crockford  (www.crockford.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -34,14 +34,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * -- 
+ * --
  *
  * @package JSMin
  * @author Ryan Grove <ryan@wonko.com>
  * @copyright 2002 Douglas Crockford <douglas@crockford.com> (jsmin.c)
  * @copyright 2007 Ryan Grove <ryan@wonko.com> (PHP port)
  * @license http://opensource.org/licenses/mit-license.php MIT License
- * @version 1.0.0 (2007-05-04)
+ * @version 1.0.1 (2007-05-19)
  * @link http://code.google.com/p/jsmin-php/
  */
 
@@ -58,7 +58,7 @@ class JSMin {
   protected $output      = array();
 
   // -- Public Static Methods --------------------------------------------------
-  
+
   public static function minify($js) {
     $jsmin = new JSMin($js);
     return $jsmin->jsmin();
@@ -67,8 +67,8 @@ class JSMin {
   // -- Public Instance Methods ------------------------------------------------
 
   public function __construct($input) {
-    $this->input       = $input;
-    $this->inputLength = strlen($input);
+    $this->input       = str_replace("\r\n", "\n", $input);
+    $this->inputLength = strlen($this->input);
   }
 
   // -- Protected Instance Methods ---------------------------------------------
