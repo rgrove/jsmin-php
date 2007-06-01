@@ -41,7 +41,7 @@
  * @copyright 2002 Douglas Crockford <douglas@crockford.com> (jsmin.c)
  * @copyright 2007 Ryan Grove <ryan@wonko.com> (PHP port)
  * @license http://opensource.org/licenses/mit-license.php MIT License
- * @version 1.0.1 (2007-05-19)
+ * @version 1.1.0 (2007-06-01)
  * @link http://code.google.com/p/jsmin-php/
  */
 
@@ -61,7 +61,7 @@ class JSMin {
 
   public static function minify($js) {
     $jsmin = new JSMin($js);
-    return $jsmin->jsmin();
+    return $jsmin->min();
   }
 
   // -- Public Instance Methods ------------------------------------------------
@@ -164,7 +164,7 @@ class JSMin {
     return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
   }
 
-  protected function jsmin() {
+  protected function min() {
     $this->a = "\n";
     $this->action(3);
 
