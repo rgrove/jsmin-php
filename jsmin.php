@@ -125,14 +125,31 @@ class JSMin {
           for (;;) {
             $this->a = $this->get();
 
-            if ($this->a === '/') {
+            if ($this->a === '[') {
+              /*
+                inside a regex [...] set, which MAY contain a '/' itself. Example: mootools Form.Validator near line 460:
+                  return Form.Validator.getValidator('IsEmpty').test(element) || (/^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]\.?){0,63}[a-z0-9!#$%&'*+/=?^_`{|}~-]@(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\])$/i).test(element.get('value'));
+              */
+              for (;;) {
+                $this->output .= $this->a;
+                $this->a = $this->get();
+
+                if ($this->a === ']') {
+                    break;
+                } elseif ($this->a === '\\') {
+                  $this->output .= $this->a;
+                  $this->a       = $this->get();
+                } elseif (ord($this->a) <= self::ORD_LF) {
+                  throw new JSMinException('Unterminated regular expression set in regex literal.');
+                }
+              }
+            } elseif ($this->a === '/') {
               break;
             } elseif ($this->a === '\\') {
               $this->output .= $this->a;
               $this->a       = $this->get();
             } elseif (ord($this->a) <= self::ORD_LF) {
-              throw new JSMinException('Unterminated regular expression '.
-                  'literal.');
+              throw new JSMinException('Unterminated regular expression literal.');
             }
 
             $this->output .= $this->a;
