@@ -73,6 +73,15 @@ class JSMin {
 
   // -- Protected Instance Methods ---------------------------------------------
 
+
+
+  /* action -- do something! What you do is determined by the argument:
+          1   Output A. Copy B to A. Get the next B.
+          2   Copy B to A. Get the next B. (Delete A).
+          3   Get the next B. (Delete B).
+     action treats a string as a single character. Wow!
+     action recognizes a regular expression if it is preceded by ( or , or =.
+  */
   protected function action($d) {
     switch($d) {
       case 1:
@@ -107,7 +116,9 @@ class JSMin {
         if ($this->b === '/' && (
             $this->a === '(' || $this->a === ',' || $this->a === '=' ||
             $this->a === ':' || $this->a === '[' || $this->a === '!' ||
-            $this->a === '&' || $this->a === '|' || $this->a === '?')) {
+            $this->a === '&' || $this->a === '|' || $this->a === '?' ||
+            $this->a === '{' || $this->a === '}' || $this->a === ';' ||
+            $this->a === "\n" )) {
 
           $this->output .= $this->a . $this->b;
 
@@ -156,6 +167,9 @@ class JSMin {
     return ' ';
   }
 
+  /* isAlphanum -- return true if the character is a letter, digit, underscore,
+        dollar sign, or non-ASCII character.
+  */
   protected function isAlphaNum($c) {
     return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
   }
@@ -241,6 +255,9 @@ class JSMin {
     return $this->output;
   }
 
+  /* next -- get the next character, excluding comments. peek() is used to see
+             if a '/' is followed by a '/' or '*'.
+  */
   protected function next() {
     $c = $this->get();
 
