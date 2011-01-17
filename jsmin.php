@@ -150,6 +150,7 @@ class JSMin {
     if ($c === null) {
       if ($this->inputIndex < $this->inputLength) {
         $c = substr($this->input, $this->inputIndex, 1);
+        //$c = $this->input[$this->inputIndex];
         $this->inputIndex += 1;
       } else {
         $c = null;
@@ -264,6 +265,21 @@ class JSMin {
     if ($c === '/') {
       switch($this->peek()) {
         case '/':
+          $this->get(); // flush the lookAhead value
+          
+          // shortcut to skip over the bulk of the comment:
+          $cmt = substr($this->input, $this->inputIndex);
+          $t = explode("\n", $cmt, 2);
+          $this->inputIndex += strlen($t[0]);
+          
+          $this->input       = $t[1];
+          $this->inputLength = strlen($this->input);
+          $this->inputIndex  = 0;
+          return "\n";
+          
+
+if (0)
+{
           for (;;) {
             $c = $this->get();
 
@@ -271,10 +287,24 @@ class JSMin {
               return $c;
             }
           }
+}
 
         case '*':
-          $this->get();
+          $this->get(); // flush the lookAhead value
 
+          // shortcut to skip over the bulk of the comment:
+          $cmt = substr($this->input, $this->inputIndex);
+          $t = explode('*/', $cmt, 2);
+          $this->inputIndex += strlen($t[0]);
+          
+          $this->input       = $t[1];
+          $this->inputLength = strlen($this->input);
+          $this->inputIndex  = 0;
+          return ' ';
+          
+
+if (0)
+{
           for (;;) {
             switch($this->get()) {
               case '*':
@@ -288,6 +318,7 @@ class JSMin {
                 throw new JSMinException('Unterminated comment.');
             }
           }
+}
 
         default:
           return $c;
