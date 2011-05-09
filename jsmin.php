@@ -62,6 +62,12 @@ class JSMin {
 
   // -- Public Static Methods --------------------------------------------------
 
+  /**
+   * Minify Javascript
+   *
+   * @param string $js Javascript to be minified
+   * @return string
+   */
   public static function minify($js) {
     $jsmin = new JSMin($js);
     return $jsmin->min();
@@ -69,6 +75,11 @@ class JSMin {
 
   // -- Public Instance Methods ------------------------------------------------
 
+  /**
+   * Constructor
+   *
+   * @param string $input Javascript to be minified
+   */
   public function __construct($input) {
     $this->input       = str_replace("\r\n", "\n", $input);
     $this->inputLength = strlen($this->input);
@@ -76,14 +87,17 @@ class JSMin {
 
   // -- Protected Instance Methods ---------------------------------------------
 
-
-
-  /* action -- do something! What you do is determined by the argument:
-          ACTION_KEEP_A    Output A. Copy B to A. Get the next B.
-          ACTION_DELETE_A  Copy B to A. Get the next B. (Delete A).
-          ACTION_DELETE_A_B  Get the next B. (Delete B).
-     action treats a string as a single character. Wow!
-     action recognizes a regular expression if it is preceded by ( or , or =.
+  /**
+   * Action -- do something! What to do is determined by the $command argument.
+   *
+   * action treats a string as a single character. Wow!
+   * action recognizes a regular expression if it is preceded by ( or , or =.
+   *
+   * @throws JSMinException If parser errors are found
+   * @param int $command One of class constants:
+   *      ACTION_KEEP_A      Output A. Copy B to A. Get the next B.
+   *      ACTION_DELETE_A    Copy B to A. Get the next B. (Delete A).
+   *      ACTION_DELETE_A_B  Get the next B. (Delete B).
   */
   protected function action($command) {
     switch($command) {
@@ -163,6 +177,11 @@ class JSMin {
     }
   }
 
+  /**
+   * Get next char. Convert ctrl char to space.
+   *
+   * @return string|null
+   */
   protected function get() {
     $c = $this->lookAhead;
     $this->lookAhead = null;
@@ -187,13 +206,21 @@ class JSMin {
     return ' ';
   }
 
-  /* isAlphanum -- return true if the character is a letter, digit, underscore,
-        dollar sign, or non-ASCII character.
-  */
+  /**
+   * Is $c a letter, digit, underscore, dollar sign, or non-ASCII character.
+   *
+   * @return bool
+   */
   protected function isAlphaNum($c) {
     return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
   }
 
+  /**
+   * Perform minification, return result
+   *
+   * @uses action(), isAlphaNum()
+   * @return string
+   */
   protected function min() {
     $this->a = "\n";
     $this->action(self::ACTION_DELETE_A_B);
@@ -275,9 +302,13 @@ class JSMin {
     return $this->output;
   }
 
-  /* next -- get the next character, excluding comments. peek() is used to see
-             if a '/' is followed by a '/' or '*'.
-  */
+  /**
+   * Get the next character, skipping over comments. peek() is used to see
+   *  if a '/' is followed by a '/' or '*'.
+   *
+   * @throws JSMinException On unterminated comment.
+   * @return string|null
+   */
   protected function next() {
     $c = $this->get();
 
@@ -317,6 +348,12 @@ class JSMin {
     return $c;
   }
 
+  /**
+   * Get next char. If is ctrl character, translate to a space or newline.
+   *
+   * @uses get()
+   * @return string|null
+   */
   protected function peek() {
     $this->lookAhead = $this->get();
     return $this->lookAhead;
