@@ -65,7 +65,8 @@ class JSMin {
   /**
    * Minify Javascript
    *
-   * @uses __construct(), min()
+   * @uses __construct()
+   * @uses min()
    * @param string $js Javascript to be minified
    * @return string
    */
@@ -94,7 +95,8 @@ class JSMin {
    * action treats a string as a single character. Wow!
    * action recognizes a regular expression if it is preceded by ( or , or =.
    *
-   * @uses next(), get()
+   * @uses next()
+   * @uses get()
    * @throws JSMinException If parser errors are found:
    *         - Unterminated string literal
    *         - Unterminated regular expression set in regex literal
@@ -223,7 +225,8 @@ class JSMin {
   /**
    * Perform minification, return result
    *
-   * @uses action(), isAlphaNum()
+   * @uses action()
+   * @uses isAlphaNum()
    * @return string
    */
   protected function min() {
@@ -311,7 +314,8 @@ class JSMin {
    * Get the next character, skipping over comments. peek() is used to see
    *  if a '/' is followed by a '/' or '*'.
    *
-   * @uses get(), peek()
+   * @uses get()
+   * @uses peek()
    * @throws JSMinException On unterminated comment.
    * @return string
    */
