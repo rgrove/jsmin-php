@@ -65,6 +65,7 @@ class JSMin {
   /**
    * Minify Javascript
    *
+   * @uses __construct(), min()
    * @param string $js Javascript to be minified
    * @return string
    */
@@ -93,7 +94,11 @@ class JSMin {
    * action treats a string as a single character. Wow!
    * action recognizes a regular expression if it is preceded by ( or , or =.
    *
-   * @throws JSMinException If parser errors are found
+   * @uses next(), get()
+   * @throws JSMinException If parser errors are found:
+   *         - Unterminated string literal
+   *         - Unterminated regular expression set in regex literal
+   *         - Unterminated regular expression literal
    * @param int $command One of class constants:
    *      ACTION_KEEP_A      Output A. Copy B to A. Get the next B.
    *      ACTION_DELETE_A    Copy B to A. Get the next B. (Delete A).
@@ -306,8 +311,9 @@ class JSMin {
    * Get the next character, skipping over comments. peek() is used to see
    *  if a '/' is followed by a '/' or '*'.
    *
+   * @uses get(), peek()
    * @throws JSMinException On unterminated comment.
-   * @return string|null
+   * @return string
    */
   protected function next() {
     $c = $this->get();
