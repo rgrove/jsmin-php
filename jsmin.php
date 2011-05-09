@@ -85,8 +85,8 @@ class JSMin {
      action treats a string as a single character. Wow!
      action recognizes a regular expression if it is preceded by ( or , or =.
   */
-  protected function action($d) {
-    switch($d) {
+  protected function action($command) {
+    switch($command) {
       case self::ACTION_KEEP_A:
         $this->output .= $this->a;
 
