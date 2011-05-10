@@ -46,8 +46,11 @@
  */
 
 class JSMin {
-  const ORD_LF    = 10;
-  const ORD_SPACE = 32;
+  const ORD_LF            = 10;
+  const ORD_SPACE         = 32;
+  const ACTION_KEEP_A     = 1;
+  const ACTION_DELETE_A   = 2;
+  const ACTION_DELETE_A_B = 3;
 
   protected $a           = '';
   protected $b           = '';
@@ -59,6 +62,14 @@ class JSMin {
 
   // -- Public Static Methods --------------------------------------------------
 
+  /**
+   * Minify Javascript
+   *
+   * @uses __construct()
+   * @uses min()
+   * @param string $js Javascript to be minified
+   * @return string
+   */
   public static function minify($js) {
     $jsmin = new JSMin($js);
     return $jsmin->min();
@@ -66,6 +77,11 @@ class JSMin {
 
   // -- Public Instance Methods ------------------------------------------------
 
+  /**
+   * Constructor
+   *
+   * @param string $input Javascript to be minified
+   */
   public function __construct($input) {
     $this->input       = str_replace("\r\n", "\n", $input);
     $this->inputLength = strlen($this->input);
@@ -73,21 +89,29 @@ class JSMin {
 
   // -- Protected Instance Methods ---------------------------------------------
 
-
-
-  /* action -- do something! What you do is determined by the argument:
-          1   Output A. Copy B to A. Get the next B.
-          2   Copy B to A. Get the next B. (Delete A).
-          3   Get the next B. (Delete B).
-     action treats a string as a single character. Wow!
-     action recognizes a regular expression if it is preceded by ( or , or =.
+  /**
+   * Action -- do something! What to do is determined by the $command argument.
+   *
+   * action treats a string as a single character. Wow!
+   * action recognizes a regular expression if it is preceded by ( or , or =.
+   *
+   * @uses next()
+   * @uses get()
+   * @throws JSMinException If parser errors are found:
+   *         - Unterminated string literal
+   *         - Unterminated regular expression set in regex literal
+   *         - Unterminated regular expression literal
+   * @param int $command One of class constants:
+   *      ACTION_KEEP_A      Output A. Copy B to A. Get the next B.
+   *      ACTION_DELETE_A    Copy B to A. Get the next B. (Delete A).
+   *      ACTION_DELETE_A_B  Get the next B. (Delete B).
   */
-  protected function action($d) {
-    switch($d) {
-      case 1:
+  protected function action($command) {
+    switch($command) {
+      case self::ACTION_KEEP_A:
         $this->output .= $this->a;
 
-      case 2:
+      case self::ACTION_DELETE_A:
         $this->a = $this->b;
 
         if ($this->a === "'" || $this->a === '"') {
@@ -110,7 +134,7 @@ class JSMin {
           }
         }
 
-      case 3:
+      case self::ACTION_DELETE_A_B:
         $this->b = $this->next();
 
         if ($this->b === '/' && (
@@ -160,6 +184,11 @@ class JSMin {
     }
   }
 
+  /**
+   * Get next char. Convert ctrl char to space.
+   *
+   * @return string|null
+   */
   protected function get() {
     $c = $this->lookAhead;
     $this->lookAhead = null;
@@ -184,24 +213,33 @@ class JSMin {
     return ' ';
   }
 
-  /* isAlphanum -- return true if the character is a letter, digit, underscore,
-        dollar sign, or non-ASCII character.
-  */
+  /**
+   * Is $c a letter, digit, underscore, dollar sign, or non-ASCII character.
+   *
+   * @return bool
+   */
   protected function isAlphaNum($c) {
     return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
   }
 
+  /**
+   * Perform minification, return result
+   *
+   * @uses action()
+   * @uses isAlphaNum()
+   * @return string
+   */
   protected function min() {
     $this->a = "\n";
-    $this->action(3);
+    $this->action(self::ACTION_DELETE_A_B);
 
     while ($this->a !== null) {
       switch ($this->a) {
         case ' ':
           if ($this->isAlphaNum($this->b)) {
-            $this->action(1);
+            $this->action(self::ACTION_KEEP_A);
           } else {
-            $this->action(2);
+            $this->action(self::ACTION_DELETE_A);
           }
           break;
 
@@ -212,19 +250,19 @@ class JSMin {
             case '(':
             case '+':
             case '-':
-              $this->action(1);
+              $this->action(self::ACTION_KEEP_A);
               break;
 
             case ' ':
-              $this->action(3);
+              $this->action(self::ACTION_DELETE_A_B);
               break;
 
             default:
               if ($this->isAlphaNum($this->b)) {
-                $this->action(1);
+                $this->action(self::ACTION_KEEP_A);
               }
               else {
-                $this->action(2);
+                $this->action(self::ACTION_DELETE_A);
               }
           }
           break;
@@ -233,11 +271,11 @@ class JSMin {
           switch ($this->b) {
             case ' ':
               if ($this->isAlphaNum($this->a)) {
-                $this->action(1);
+                $this->action(self::ACTION_KEEP_A);
                 break;
               }
 
-              $this->action(3);
+              $this->action(self::ACTION_DELETE_A_B);
               break;
 
             case "\n":
@@ -249,21 +287,21 @@ class JSMin {
                 case '-':
                 case '"':
                 case "'":
-                  $this->action(1);
+                  $this->action(self::ACTION_KEEP_A);
                   break;
 
                 default:
                   if ($this->isAlphaNum($this->a)) {
-                    $this->action(1);
+                    $this->action(self::ACTION_KEEP_A);
                   }
                   else {
-                    $this->action(3);
+                    $this->action(self::ACTION_DELETE_A_B);
                   }
               }
               break;
 
             default:
-              $this->action(1);
+              $this->action(self::ACTION_KEEP_A);
               break;
           }
       }
@@ -272,9 +310,15 @@ class JSMin {
     return $this->output;
   }
 
-  /* next -- get the next character, excluding comments. peek() is used to see
-             if a '/' is followed by a '/' or '*'.
-  */
+  /**
+   * Get the next character, skipping over comments. peek() is used to see
+   *  if a '/' is followed by a '/' or '*'.
+   *
+   * @uses get()
+   * @uses peek()
+   * @throws JSMinException On unterminated comment.
+   * @return string
+   */
   protected function next() {
     $c = $this->get();
 
@@ -314,6 +358,12 @@ class JSMin {
     return $c;
   }
 
+  /**
+   * Get next char. If is ctrl character, translate to a space or newline.
+   *
+   * @uses get()
+   * @return string|null
+   */
   protected function peek() {
     $this->lookAhead = $this->get();
     return $this->lookAhead;
