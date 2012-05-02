@@ -1,4 +1,6 @@
 ﻿var foo = function() {
-    var bar = 2 + 2;
-    return bar;
+    var bar = 2
+    !bar
+    ~bar
+    return bar
 };

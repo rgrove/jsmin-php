@@ -259,6 +259,8 @@ class JSMin {
             case '(':
             case '+':
             case '-':
+            case '!':
+            case '~':
               $this->action(self::ACTION_KEEP_A);
               break;
 
