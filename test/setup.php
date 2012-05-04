@@ -27,4 +27,8 @@ foreach($libs as $name => $url) {
   file_put_contents(__DIR__ . "/libs/$name.js", file_get_contents($url));
 }
 
+// Copy utf-8 file to the libs directory
+echo "Copying UTF-8 file with BOM...\n";
+copy(__DIR__ . '/utf8-with-bom.js', __DIR__ . '/libs/utf8-with-bom.js');
+
 echo "Done\n";

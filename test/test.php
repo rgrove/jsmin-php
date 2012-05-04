@@ -8,7 +8,8 @@ $libs = array(
   'ext',
   'jquery',
   'mootools',
-  'yui'
+  'yui',
+  'utf8-with-bom'
 );
 
 foreach ($libs as $lib) {
