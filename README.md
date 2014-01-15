@@ -9,3 +9,4 @@ Here are some of them:
 
 - [Uglify](https://github.com/mishoo/UglifyJS2)
 - [Google Closure Compiler](https://developers.google.com/closure/compiler/)
+- [JShrink](https://github.com/tedivm/JShrink)
